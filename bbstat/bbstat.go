@@ -7,8 +7,8 @@ daemon.
 package main
 
 import (
-	"github.com/dave-andersen/gobbr"
 	"fmt"
+	"github.com/dave-andersen/gobbr"
 	"time"
 )
 
@@ -34,14 +34,13 @@ func main() {
 	}
 }
 
-
 type BBBalance struct {
-	Balance uint64 `json:"balance"`
+	Balance         uint64 `json:"balance"`
 	UnlockedBalance uint64 `json:"unlocked_balance"`
 }
 
 type BBJsonResponse struct {
-	Id int `json:"id"`
+	Id      int    `json:"id"`
 	Jsonrpc string `json:"jsonrpc"`
 }
 
@@ -51,16 +50,16 @@ type BBBalanceResponse struct {
 }
 
 type BBTransferDestination struct {
-	Amount uint64 `json:"amount"`
+	Amount  uint64 `json:"amount"`
 	Address string `json:"address"`
 }
 
 type BBTransfer struct {
 	Destinations []BBTransferDestination `json:"destinations"`
-	Fee uint64 `json:"fee"`
-	Mixin uint64 `json:"mixin"`
-	UnlockTime uint64 `json:"unlock_time"`
-	PaymentId string `json:"paymnet_id_hex"` // sic.  It's in the bool code.
+	Fee          uint64                  `json:"fee"`
+	Mixin        uint64                  `json:"mixin"`
+	UnlockTime   uint64                  `json:"unlock_time"`
+	PaymentId    string                  `json:"paymnet_id_hex"` // sic.  It's in the bool code.
 }
 
 type BBTransferResponse struct {
@@ -72,13 +71,13 @@ type BBTransferResponse struct {
 
 type BBBlockHeader struct {
 	Timestamp uint64 `json:"timestamp"`
-	Height uint64 `json:"height"`
+	Height    uint64 `json:"height"`
 }
 
 type BBGetBlockHeaderResponse struct {
 	BBJsonResponse
 	Result struct {
-		Status string `json:"status"`
+		Status      string        `json:"status"`
 		BlockHeader BBBlockHeader `json:"block_header"`
 	}
 }
