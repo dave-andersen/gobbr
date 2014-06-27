@@ -6,6 +6,10 @@ Go RPC interface for Boolberry wallet and daemon.
 For now, see the bbstat/bbstat.go program as an example of how to
 use the interface.  Real docs will come soon.
 
+The example program bbsend/bbsend.go can be used to transfer
+BBR to another account from the command line, and shows how to
+use the Transfer function.
+
 ## COPYRIGHT
 
    Copyright 2014 David G. Andersen
