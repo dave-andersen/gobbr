@@ -26,7 +26,8 @@ import (
 )
 
 const (
-	Multiplier = 1000000000000
+	Multiplier = (1e12)
+	TransferFee = 100000000  /* in uint64 units */
 )
 
 type JsonResponse struct {
@@ -146,4 +147,41 @@ func (w *Wallet) GetBalance() (balance Balance, err error) {
 		"method": "getbalance",
 	})
 	return resp.Result, err
+}
+
+type TransferDestination struct {
+	Amount uint64 `json:"amount"`
+	Address string `json:"address"`
+}
+
+type Transfer struct {
+	Destinations []TransferDestination `json:"destinations"`
+	Fee uint64 `json:"fee"`
+	Mixin uint64 `json:"mixin"`
+	UnlockTime uint64 `json:"unlock_time"`
+	PaymentId string `json:"payment_id_hex"`
+}
+
+type TransferResponse struct {
+	JsonResponse
+	Result struct {
+		TxHash string `json:"tx_hash"`
+	} `json:"result"`
+}
+
+func (w *Wallet) Transfer(destination string, amount uint64, mixinCount uint64, paymentId string) (txid string, err error) {
+	var resp TransferResponse
+	var req = &Transfer{}
+	req.Destinations = []TransferDestination{ TransferDestination{amount, destination}}
+	req.Fee = TransferFee
+	req.Mixin = mixinCount
+	req.UnlockTime = 0
+	req.PaymentId = paymentId /* must be hex string */
+	
+	err = w.DoJSONQuery(&resp, map[string]interface{}{
+		"method": "transfer",
+		"params":req,
+	})
+	
+	return resp.Result.TxHash, err
 }
