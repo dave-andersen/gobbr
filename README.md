@@ -3,6 +3,9 @@ gobbr
 
 Go RPC interface for Boolberry wallet and daemon.
 
+For now, see the bbstat/bbstat.go program as an example of how to
+use the interface.  Real docs will come soon.
+
 ## COPYRIGHT
 
    Copyright 2014 David G. Andersen
