@@ -19,6 +19,7 @@ package gobbr
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,9 +31,23 @@ const (
 	TransferFee = 100000000  /* in uint64 units */
 )
 
+type ErrorStruct struct {
+	Code int `json:"code"`
+	Message string `json:"message"`
+}
+
 type JsonResponse struct {
 	Id      int    `json:"id"`
 	Jsonrpc string `json:"jsonrpc"`
+	Error ErrorStruct `json:"error"`
+}
+
+func (j *JsonResponse) GetError() ErrorStruct {
+	return j.Error
+}
+
+type HasError interface {
+	GetError() ErrorStruct
 }
 
 func ReadPostQuery(url string, data []byte) ([]byte, error) {
@@ -50,7 +65,7 @@ func ReadPostQuery(url string, data []byte) ([]byte, error) {
 	return response_body, nil
 }
 
-func DoJSONQuery(url string, dest interface{}, args map[string]interface{}) error {
+func DoJSONQuery(url string, dest HasError, args map[string]interface{}) error {
 	args["jsonrpc"] = "2.0"
 	jsonbuf, err := json.Marshal(args)
 	if err != nil {
@@ -64,6 +79,10 @@ func DoJSONQuery(url string, dest interface{}, args map[string]interface{}) erro
 	err = json.Unmarshal(response_body, &dest)
 	if err != nil {
 		return err
+	}
+	neterr := dest.GetError()
+	if neterr.Code != 0 {
+		return errors.New(neterr.Message)
 	}
 	return nil
 }
@@ -88,11 +107,11 @@ func NewWallet(address string) *Wallet {
 	return d
 }
 
-func (d *Daemon) DoJSONQuery(dest interface{}, args map[string]interface{}) error {
+func (d *Daemon) DoJSONQuery(dest HasError, args map[string]interface{}) error {
 	return DoJSONQuery(d.address+"/json_rpc", dest, args)
 }
 
-func (w *Wallet) DoJSONQuery(dest interface{}, args map[string]interface{}) error {
+func (w *Wallet) DoJSONQuery(dest HasError, args map[string]interface{}) error {
 	return DoJSONQuery(w.address+"/json_rpc", dest, args)
 }
 
@@ -213,14 +232,11 @@ func (w *Wallet) GetPayments(paymentId string) (payments []PaymentDetails, err e
 		"method": "get_payments",
 		"params":req,
 	})
-	//fmt.Println("Resp: ", resp)
 	return resp.Result.Payments, err
 }
 
 /*
  * Known bugs tracking:
- * -- Functions need to check error field returned in JSON and map those back to 
- *    a golang error
  * -- GetPayments is mostly untested because the API call needs a payment ID
  *
  * Todo tracking:
