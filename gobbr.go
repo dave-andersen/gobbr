@@ -42,6 +42,7 @@ func ReadPostQuery(url string, data []byte) ([]byte, error) {
 		return nil, err
 	}
 	response_body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("responsebody: ", string(response_body))
 	if err != nil {
 		return nil, err
 	}
@@ -185,3 +186,44 @@ func (w *Wallet) Transfer(destination string, amount uint64, mixinCount uint64, 
 	
 	return resp.Result.TxHash, err
 }
+
+type PaymentDetails struct {
+	TxHash string `json:"tx_hash"`
+	Amount uint64 `json:"amount"`
+	BlockHeight uint64 `json:"block_height"`
+	UnlockTime uint64 `json:"unlock_time"`
+}
+
+type PaymentsResponse struct {
+	JsonResponse
+	Result struct {
+		Payments []PaymentDetails `json:"payments"`
+	}
+}
+
+type PaymentsRequest struct {
+	PaymentId string `json:"payment_id"`
+}
+
+func (w *Wallet) GetPayments(paymentId string) (payments []PaymentDetails, err error) {
+	var resp PaymentsResponse
+	var req PaymentsRequest
+	req.PaymentId = paymentId
+	err = w.DoJSONQuery(&resp, map[string]interface{}{
+		"method": "get_payments",
+		"params":req,
+	})
+	//fmt.Println("Resp: ", resp)
+	return resp.Result.Payments, err
+}
+
+/*
+ * Known bugs tracking:
+ * -- Functions need to check error field returned in JSON and map those back to 
+ *    a golang error
+ * -- GetPayments is mostly untested because the API call needs a payment ID
+ *
+ * Todo tracking:
+ * -- Add support for some of the "info" outputs from the daemon -- those
+ *    would make for nice sample apps for, e.g., showing network state.
+ */
