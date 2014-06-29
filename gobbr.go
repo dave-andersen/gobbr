@@ -154,6 +154,38 @@ func (d *Daemon) GetHeight() (uint64, error) {
 	return resp.Height, nil
 }
 
+type GetInfoResponse struct {
+	AliasCount uint64 `json:"alias_count"`
+	AltBlocksCount uint64 `json:"alt_blocks_count"`
+	CurrentBlocksMedian uint64 `json:"current_blocks_median"`
+	CurrentNetworkHashrate350 uint64 `json:"current_network_hashrate_350"`
+	CurrentNetworkHashrate50 uint64 `json:"current_network_hashrate_50"`
+	Difficulty uint64 `json:"difficulty"`
+	GreyPeerlistSize uint64 `json:"grey_peerlist_size"`
+	Height uint64 `json:"height"`
+	IncomingConnectionsCount uint64 `json:"incoming_connections_count"`
+	OutgoingConnectionsCount uint64 `json:"outgoing_connections_count"`
+	ScratchpadSize uint64 `json:"scratchpad_size"`
+	TxCount uint64 `json:"tx_count"`
+	TxPoolSize uint64 `json:"tx_pool_size"`
+	WhitePeerlistSize uint64 `json:"white_peerlist_size"`
+	Status string `json:"status"`
+}
+
+func (d *Daemon) GetInfo() (GetInfoResponse, error) {
+	var resp GetInfoResponse
+	err := DoGetJSON(d.address + "/getinfo", &resp)
+	if err != nil {
+		return resp, err
+	}
+	if (resp.Status != "OK") {
+		return resp, errors.New(resp.Status)
+	}
+	return resp, nil
+}
+
+
+
 
 /*
  * Queries about the blockchain

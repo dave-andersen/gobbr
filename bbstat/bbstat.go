@@ -24,6 +24,14 @@ func main() {
 		return
 	}
 	fmt.Printf("Current height: %d\n", height)
+
+	info, err := d.GetInfo()
+	if err != nil {
+		fmt.Println("Error getting info: ", err)
+		return
+	}
+
+	fmt.Printf("Current difficulty: %d\n", info.Difficulty)
 		
 
 	bh, err := d.GetBlockHeaderByHeight(height-1)
