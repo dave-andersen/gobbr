@@ -17,7 +17,16 @@ const WALLET_ADDRESS = "http://localhost:9291" // pick something
 
 func main() {
 	d := gobbr.NewDaemon(DAEMON_ADDRESS)
-	bh, err := d.GetBlockHeaderByHeight(1)
+
+	height, err := d.GetHeight()
+	if err != nil {
+		fmt.Println("Error getting height: ", err)
+		return
+	}
+	fmt.Printf("Current height: %d\n", height)
+		
+
+	bh, err := d.GetBlockHeaderByHeight(height-1)
 	if err == nil {
 		fmt.Printf("Block %d has timestamp %s\n", bh.Height,
 			time.Unix(int64(bh.Timestamp), 0))

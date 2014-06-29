@@ -57,7 +57,6 @@ func ReadPostQuery(url string, data []byte) ([]byte, error) {
 		return nil, err
 	}
 	response_body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println("responsebody: ", string(response_body))
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +86,25 @@ func DoJSONQuery(url string, dest HasError, args map[string]interface{}) error {
 	return nil
 }
 
+func DoGetJSON(url string, dest interface{}) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	response_body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	err = json.Unmarshal(response_body, &dest)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 type Daemon struct {
 	address string
 }
@@ -114,6 +132,28 @@ func (d *Daemon) DoJSONQuery(dest HasError, args map[string]interface{}) error {
 func (w *Wallet) DoJSONQuery(dest HasError, args map[string]interface{}) error {
 	return DoJSONQuery(w.address+"/json_rpc", dest, args)
 }
+
+/*
+ * Daemon queries - not JSON_RPC encoded
+ */
+
+type GetHeightResponse struct {
+	Height uint64 `json:"height"`
+	Status string `json:"status"`
+}
+
+func (d *Daemon) GetHeight() (uint64, error) {
+	var resp GetHeightResponse
+	err := DoGetJSON(d.address + "/getheight", &resp)
+	if err != nil {
+		return 0, err
+	}
+	if (resp.Status != "OK") {
+		return 0, errors.New(resp.Status)
+	}
+	return resp.Height, nil
+}
+
 
 /*
  * Queries about the blockchain
