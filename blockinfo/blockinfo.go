@@ -1,7 +1,7 @@
 /*
  Blockinfo is an example program using the bbrpc interface.
- It retrieves the header for every block in the blockchain and
- will print out which ones were orphans.
+ It prints out the trailing 24 hour average reward from the
+ blockchain (actually, 720 blocks, not strictly 24 hours).
 
  The secondary purpose of this program is to benchmark the time
  it takes to retrieve a lot of blockchain data.
@@ -29,9 +29,7 @@ func main() {
 	nonOrphans := 0
 	totalReward := uint64(0)
 
-	// For benchmarking, set
-	//height = 1000
-	for i := uint64(0); i < height; i++ {
+	for i := (height-720); i < height; i++ {
 		bh, err := d.GetBlockHeaderByHeight(i)
 		if err != nil {
 			fmt.Println("Error getting blockheader: ", err)
@@ -45,6 +43,6 @@ func main() {
 			totalReward += bh.Reward
 		}
 	}
-	fmt.Printf("Normal: %d  Orphans:  %d  Reward: %2.f\n", nonOrphans, orphans,
-		float64(totalReward)/gobbr.Multiplier )
+	fmt.Printf("Normal: %d  Orphans:  %d  Avg Reward: %2.f\n", nonOrphans, orphans,
+		float64(totalReward)/float64(nonOrphans*gobbr.Multiplier) )
 }
