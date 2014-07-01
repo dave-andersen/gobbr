@@ -50,9 +50,9 @@ type HasError interface {
 	GetError() ErrorStruct
 }
 
-func ReadPostQuery(url string, data []byte) ([]byte, error) {
+func ReadPostQuery(cli *http.Client, url string, data []byte) ([]byte, error) {
 	rd := bytes.NewReader(data)
-	resp, err := http.Post(url, "application/json", rd)
+	resp, err := cli.Post(url, "application/json", rd)
 	if err != nil {
 		return nil, err
 	}
@@ -64,14 +64,14 @@ func ReadPostQuery(url string, data []byte) ([]byte, error) {
 	return response_body, nil
 }
 
-func DoJSONQuery(url string, dest HasError, args map[string]interface{}) error {
+func DoJSONQuery(cli *http.Client, url string, dest HasError, args map[string]interface{}) error {
 	args["jsonrpc"] = "2.0"
 	jsonbuf, err := json.Marshal(args)
 	if err != nil {
 		fmt.Println("error on marshal: ", err)
 		os.Exit(-1)
 	}
-	response_body, err := ReadPostQuery(url, jsonbuf)
+	response_body, err := ReadPostQuery(cli, url, jsonbuf)
 	if err != nil {
 		return err
 	}
@@ -107,30 +107,30 @@ func DoGetJSON(url string, dest interface{}) error {
 
 type Daemon struct {
 	address string
+	cli *http.Client
 }
 
 func NewDaemon(address string) *Daemon {
-	/* Todo:  Connect and keep connection cached */
-	d := &Daemon{address}
+	d := &Daemon{address, &http.Client{}}
 	return d
 }
 
 type Wallet struct {
 	address string
+	cli *http.Client
 }
 
 func NewWallet(address string) *Wallet {
-	/* Todo:  Connect and keep connection cached */
-	d := &Wallet{address}
+	d := &Wallet{address, &http.Client{}}
 	return d
 }
 
 func (d *Daemon) DoJSONQuery(dest HasError, args map[string]interface{}) error {
-	return DoJSONQuery(d.address+"/json_rpc", dest, args)
+	return DoJSONQuery(d.cli, d.address+"/json_rpc", dest, args)
 }
 
 func (w *Wallet) DoJSONQuery(dest HasError, args map[string]interface{}) error {
-	return DoJSONQuery(w.address+"/json_rpc", dest, args)
+	return DoJSONQuery(w.cli, w.address+"/json_rpc", dest, args)
 }
 
 /*
@@ -312,6 +312,6 @@ func (w *Wallet) GetPayments(paymentId string) (payments []PaymentDetails, err e
  * -- GetPayments is mostly untested because the API call needs a payment ID
  *
  * Todo tracking:
- * -- Add support for some of the "info" outputs from the daemon -- those
- *    would make for nice sample apps for, e.g., showing network state.
+ * -- Build a more interesting sample app.
+ * -- Add an RPC method to the daemon to get more payments
  */
