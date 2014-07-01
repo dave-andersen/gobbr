@@ -10,6 +10,14 @@ The example program bbsend/bbsend.go can be used to transfer
 BBR to another account from the command line, and shows how to
 use the Transfer function.
 
+blockinfo iterates through every block header (the slow way),
+calculates the total reward, and prints it out.  Warning:  Takes
+40s or so per 1000 blocks.  Slow, and mostly intended for benchmarking
+and testing the blockheader code.
+
+listpayments is an incomplete example program to show information about
+payments received in the wallet.
+
 ## COPYRIGHT
 
    Copyright 2014 David G. Andersen

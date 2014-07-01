@@ -57,10 +57,10 @@ func ReadPostQuery(cli *http.Client, url string, data []byte) ([]byte, error) {
 		return nil, err
 	}
 	response_body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
-	resp.Body.Close()
 	return response_body, nil
 }
 
@@ -192,9 +192,17 @@ func (d *Daemon) GetInfo() (GetInfoResponse, error) {
  */
 
 type BlockHeader struct {
+	MajorVersion uint8 `json:"major_version"`
+	MinorVersion uint8 `json:"minor_version"`
 	Timestamp uint64 `json:"timestamp"`
-	Height    uint64 `json:"height"`
-	/* INCOMPLETE */
+	PrevHash string `json:"prev_hash"`
+	Nonce uint64 `json:"nonce"`
+	OrphanStatus bool `json:"orphan_status"`
+	Height uint64 `json:"height"`
+	Depth uint64 `json:"depth"`
+	Hash string `json:"hash"`
+	Difficulty uint64 `json:"difficulty"`
+	Reward uint64 `json:"reward"`
 }
 
 type GetBlockHeaderResponse struct {
